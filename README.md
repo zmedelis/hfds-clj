@@ -2,7 +2,10 @@
 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.zmedelis/hfds-clj.svg)](https://clojars.org/io.github.zmedelis/hfds-clj)
 
-**hfds-clj** is a lib to help you get to the [HuggingFace datasets](https://huggingface.co/datasets). The lib provides a single feature of seamlessly downloading HF datasets, saving downloaded sets in the cache, and serving it from there for subsequent requests.
+**hfds-clj** is a lib to help you get to the [HuggingFace datasets](https://huggingface.co/datasets). The lib provides seamless access to datasets via this process:
+* *downloading* HF dataset,
+* *caching* downloaded set locally, and
+* *serving* it from there for subsequent requests.
 
 It does not aim to replicate the full range of functionality found in the [HuggingFace datasets library](https://huggingface.co/docs/datasets/v2.14.5/en/index). Though as an immediate extension, it would be great to support [Dataset Features](https://huggingface.co/docs/datasets/v2.14.5/en/about_dataset_features).
 
