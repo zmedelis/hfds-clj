@@ -34,4 +34,5 @@ A more fine-grained data set request is supported via a parameterized call:
 
 ## Notes
 
-This is extracted from [Bosquet](https://github.com/zmedelis/bosquet) where HuggingFace datasets are used for LLM related developments.
+* This is extracted from [Bosquet](https://github.com/zmedelis/bosquet) where HuggingFace datasets are used for LLM related developments.
+* Thanks to [TrueGrit](https://github.com/KingMob/TrueGrit) helping to rebustly fetch data from HF API
