@@ -1,0 +1,21 @@
+{:paths ["src" "resources"]
+ :deps  {org.clojure/clojure      {:mvn/version "1.11.1"}
+         net.modulolotus/truegrit {:mvn/version "2.1.30"}
+         me.flowthing/pp          {:mvn/version "2023-10-05.5"}
+         hato/hato                {:mvn/version "0.9.0"}
+         com.taoensso/timbre      {:mvn/version "6.3.1"}
+         metosin/jsonista         {:mvn/version "0.3.8"}
+         progrock/progrock        {:mvn/version "0.1.2"}}
+ :aliases
+ {:build
+  {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.2" :git/sha "fe6b140"}
+                slipset/deps-deploy           {:mvn/version "0.2.2"}}
+   :ns-default build}
+  :neil
+  {:project {:name    io.github.zmedelis/hfds-clj
+             :version "v2023.11.05"}}
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+                 io.github.cognitect-labs/test-runner
+                 {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}}}
