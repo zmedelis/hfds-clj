@@ -31,3 +31,7 @@ A more fine-grained data set request is supported via a parameterized call:
                           :hfds/limit         4000}))
 
 ```
+
+## Notes
+
+This is extracted from [Bosquet](https://github.com/zmedelis/bosquet) where HuggingFace datasets are used for LLM related developments.
