@@ -1,4 +1,4 @@
-## hfds-clj/hfds-clj
+## 🪣 hfds-clj
 
 [![Clojars Project](https://img.shields.io/clojars/v/io.github.zmedelis/hfds-clj.svg)](https://clojars.org/io.github.zmedelis/hfds-clj)
 
