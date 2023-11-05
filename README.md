@@ -28,6 +28,7 @@ A more fine-grained data set request is supported via a parameterized call:
                           :offset  0
                           :length  100}
                          {:hfds/download-mode :reuse-dataset-if-exists
+                          :hfds/cache-dir     "/home/maddaddam/data"
                           :hfds/limit         4000}))
 
 ```
