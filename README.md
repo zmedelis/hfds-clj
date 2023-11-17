@@ -30,10 +30,9 @@ A more fine-grained data set request is supported via a parameterized call:
                           :config  "default"
                           :offset  0
                           :length  100}
-                         {:hfds/download-mode :reuse-dataset-if-exists
-                          :hfds/cache-dir     "/home/maddaddam/data"
-                          :hfds/limit         4000}))
-
+               {:hfds/download-mode :reuse-dataset-if-exists
+                :hfds/cache-dir     "/data"
+                :hfds/limit         4000}))
 ```
 
 ## Notes
