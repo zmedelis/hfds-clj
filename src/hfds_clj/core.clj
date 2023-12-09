@@ -87,6 +87,18 @@
               (recur (inc page)))
             (timbre/info "\nDone downloading 🤗")))))))
 
+(defn download-cli
+  "A version of `download-ds` to be used for CLI invocation (fixes the params)."
+  [{:keys [cache-dir limit offset length] :as params}]
+  (download-ds
+   (assoc params
+          :offset offset
+          :length length)
+   (merge
+    (when limit {:hfds/limit limit})
+    (when cache-dir
+      {:hfds/cache-dir cache-dir}))))
+
 (defn read-ds
   "Read data set from the cache. It is assumed that it is there.
    See `load-dataset` for params documentation."

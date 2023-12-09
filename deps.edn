@@ -7,11 +7,13 @@
          metosin/jsonista         {:mvn/version "0.3.8"}
          progrock/progrock        {:mvn/version "0.1.2"}}
  :aliases
- {:run-x
+ {:download
   {:ns-default hfds-clj.core
-   :exec-fn download-ds
-   :exec-args {:dataset nil
-               :split   nil}}
+   :exec-fn download-cli
+   :exec-args {:split   "train"
+               :config  "default"
+               :offset  0
+               :length  100}}
 
   :outdated
   {:deps      {com.github.liquidz/antq {:mvn/version "RELEASE"}}

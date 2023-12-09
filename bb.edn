@@ -9,4 +9,4 @@
          clean      (shell "rm -rf .cpcache target")
          deploy     (clojure "-T:build" "build/deploy")
          uber       (clojure "-T:build" "uber")
-         download   (clojure "-X:run-x")}}
+         download   (clojure "-X:download")}}
