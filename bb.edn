@@ -1,0 +1,12 @@
+{:paths ["src" "test"]
+ :tasks {outdated   (clojure "-M:outdated")
+         test:watch (do (clojure "-M:outdated")
+                        (clojure "-M:kaocha:test"))
+         lint       (shell "clj-kondo --lint src:test")
+         format     (shell "cljfmt check")
+         format:fix (shell "cljfmt fix")
+         pom        (clojure "-Spom")
+         clean      (shell "rm -rf .cpcache target")
+         deploy     (clojure "-T:build" "build/deploy")
+         uber       (clojure "-T:build" "uber")
+         download   (clojure "-X:run-x")}}
