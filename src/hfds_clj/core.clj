@@ -52,12 +52,12 @@
   "Fetch dataset with True Grit backed resilience. It will retry fetching on HF errors."
   [hf-params]
   (let [fetch (-> (fn [] (fetch-dataset* hf-params))
-                (tg/with-time-limiter {:timeout-duration 5000})
-                (tg/with-retry
-                  {:name            "hf-retry"
-                   :max-attempts    5
-                   :wait-duration   1000
-                   :retry-on-result nil?}))]
+                  (tg/with-time-limiter {:timeout-duration 5000})
+                  (tg/with-retry
+                    {:name            "hf-retry"
+                     :max-attempts    5
+                     :wait-duration   1000
+                     :retry-on-result nil?}))]
     (fetch)))
 
 (defn download-ds
