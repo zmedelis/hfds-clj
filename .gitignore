@@ -1,6 +1,6 @@
 .calva/output-window/
 .classpath
-.clj-kondo/.cache
+.clj-kondo
 .cpcache
 .eastwood
 .factorypath
