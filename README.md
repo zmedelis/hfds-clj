@@ -11,6 +11,16 @@ It does not aim to replicate the full range of functionality found in the [Huggi
 
 ## Usage
 
+### CLI
+
+Data sets can be downloaded from the command line
+```
+clojure -X:download :dataset "allenai/prosocial-dialog"
+```
+See next section for parameter description.
+
+### Code
+
 ```clojure
 (require '[hfds-clj.core :refer [load-dataset]])
 ```
