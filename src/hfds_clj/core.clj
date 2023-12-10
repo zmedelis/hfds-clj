@@ -13,7 +13,7 @@
     [net.modulolotus.truegrit :as tg]
     [me.flowthing.pp :as pp]))
 
-(def ^:private datasets-server "https://datasets-server.huggingface.co/rows")
+(def ^:private datasets-server "https://datasets-server.huggingface.co")
 
 (def ^:private default-cache-dir (str (System/getProperty "user.home") "/.cache/hfds-clj"))
 
@@ -27,31 +27,42 @@
   (spit ds-file (pp-str ds)))
 
 (defn- ds-dir-name
-  [cache-dir split dataset]
-  (str cache-dir "/" dataset "/" split))
+  [cache-dir dataset config-name split]
+  (str cache-dir "/" dataset "/" config-name "/" split))
 
 (defn- ds-cached?
-  [cache-dir split dataset]
-  (.exists (io/file (ds-dir-name cache-dir split dataset))))
+  [cache-dir dataset config-name split]
+  (.exists (io/file (ds-dir-name cache-dir dataset config-name split))))
 
 (defn- ds-file
-  ([cache-dir split dataset] (ds-file cache-dir split dataset 1))
-  ([cache-dir split dataset part-nr]
+  ([cache-dir dataset config-name split] (ds-file cache-dir dataset config-name split 1))
+  ([cache-dir dataset config-name split part-nr]
    (io/file
     (format "%s/part-%04d.edn"
-            (ds-dir-name cache-dir split dataset)
+            (ds-dir-name cache-dir dataset config-name split)
             part-nr))))
+
+(defn- info-file
+  [cache-dir dataset config-name]
+  (str cache-dir "/" dataset "/" config-name "/info.edn" ))
+
+(defn- fetch-hf
+  [hf-url params]
+  (-> (hc/get hf-url {:query-params params})
+      :body
+      (j/read-value j/keyword-keys-object-mapper)))
 
 (defn- fetch-dataset*
   [ds-params]
-  (-> (hc/get datasets-server {:query-params ds-params})
-    :body
-    (j/read-value j/keyword-keys-object-mapper)))
+  (fetch-hf (str datasets-server "/rows") ds-params))
 
 (defn- fetch-dataset
-  "Fetch dataset with True Grit backed resilience. It will retry fetching on HF errors."
+  "Fetch dataset with True Grit backed resilience. It will retry fetching on HF errors.
+
+  Drop all HF metadata like `features`"
   [hf-params]
-  (let [fetch (-> (fn [] (fetch-dataset* hf-params))
+  (let [fetch (-> (fn [] (mapv :row
+                               (:rows (fetch-dataset* hf-params))))
                   (tg/with-time-limiter {:timeout-duration 5000})
                   (tg/with-retry
                     {:name            "hf-retry"
@@ -60,30 +71,37 @@
                      :retry-on-result nil?}))]
     (fetch)))
 
+(defn- fetch-info
+  [params]
+  (fetch-hf (str datasets-server "/info") params))
+
 (defn download-ds
   "Download data set from the HuggingFace. See `load-dataset` for params documentation"
-  [{:keys [dataset offset length split]
+  [{:keys [dataset offset length split config]
     :as   params}
    {:hfds/keys [cache-dir limit]
     :or        {cache-dir default-cache-dir}}]
   (timbre/infof "Downloading %s:%s" dataset split)
   (letfn [(log-progress [bar page]
             (pr/print (pr/tick bar (* page length))))]
-    (let [{:keys [num_rows_total] :as first-page} (fetch-dataset params)
-          record-limit                            (or limit num_rows_total)
-          bar                                     (pr/progress-bar record-limit)]
+    (let [{:keys [dataset_info] :as info} (fetch-info params)
+          rows-total                      (get-in dataset_info [ :splits (keyword split) :num_examples])
+          page                            (fetch-dataset params)
+          record-limit                    (or limit rows-total)
+          bar                             (pr/progress-bar record-limit)]
       (log-progress bar 1)
-      (write-ds (ds-file cache-dir split dataset 1) first-page)
+      (write-ds (ds-file cache-dir dataset config split 1) page)
+      (write-ds (info-file cache-dir dataset config) info)
       (loop [page 1]
         (let [from-offset (+ offset (* page length))]
           (if (and
-                (> num_rows_total from-offset)
-                (> record-limit from-offset))
+               (> rows-total from-offset)
+               (> record-limit from-offset))
             (do
               (log-progress bar (inc page))
               (write-ds
-                (ds-file cache-dir split dataset (inc page))
-                (fetch-dataset (assoc params :offset (+ offset (* page length)))))
+               (ds-file cache-dir dataset config split (inc page))
+               (fetch-dataset (assoc params :offset (+ offset (* page length)))))
               (recur (inc page)))
             (timbre/info "\nDone downloading 🤗")))))))
 
@@ -102,7 +120,7 @@
 (defn read-ds
   "Read data set from the cache. It is assumed that it is there.
    See `load-dataset` for params documentation."
-  [{:keys [dataset split]}
+  [{:keys [dataset split config]}
    {:hfds/keys [limit cache-dir]
     :or        {cache-dir default-cache-dir}}]
   (timbre/infof "Loading '%s:%s' from cache" dataset split)
@@ -111,7 +129,7 @@
              (mapcat #(-> % slurp edn/read-string :rows))
              (map :row))
         ds   (sequence xf
-               (file-seq (io/file (ds-dir-name cache-dir split dataset))))]
+               (file-seq (io/file (ds-dir-name cache-dir dataset config split))))]
     (if limit
       (take limit ds)
       ds)))
@@ -146,7 +164,7 @@
                     :offset  offset
                     :length  length}]
      (if (and (= :reuse-dataset-if-exists download-mode)
-           (ds-cached? cache-dir split dataset))
+           (ds-cached? cache-dir dataset config split))
        (read-ds ds-params read-params)
        (do
          (download-ds ds-params read-params)

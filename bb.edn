@@ -8,5 +8,4 @@
          pom        (clojure "-Spom")
          clean      (shell "rm -rf .cpcache target")
          deploy     (clojure "-T:build" "build/deploy")
-         uber       (clojure "-T:build" "uber")
-         download   (clojure "-X:download")}}
+         uber       (clojure "-T:build" "uber")}}
