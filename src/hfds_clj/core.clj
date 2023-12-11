@@ -123,13 +123,12 @@
   [{:keys [dataset split config]}
    {:hfds/keys [limit cache-dir]
     :or        {cache-dir default-cache-dir}}]
-  (timbre/infof "Loading '%s:%s' from cache" dataset split)
+  (timbre/infof "Loading from cache dir '%s" (ds-dir-name cache-dir dataset config split))
   (let [xf (comp
              (filter #(.isFile %))
-             (mapcat #(-> % slurp edn/read-string :rows))
-             (map :row))
+             (mapcat #(-> % slurp edn/read-string)))
         ds   (sequence xf
-               (file-seq (io/file (ds-dir-name cache-dir dataset config split))))]
+                       (file-seq (io/file (ds-dir-name cache-dir dataset config split))))]
     (if limit
       (take limit ds)
       ds)))
