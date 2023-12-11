@@ -1,13 +1,4 @@
-{:features
- [{:feature_idx 0,
-   :name "text",
-   :type {:dtype "string", :_type "Value"}}
-  {:feature_idx 1,
-   :name "label",
-   :type {:_type "ClassLabel", :names ["neg" "pos"]}}],
- :num_rows_per_page 100,
- :rows
- [{:truncated_cells [],
+[{:truncated_cells [],
    :row_idx 0,
    :row
    {:label 1,
@@ -40,4 +31,3 @@
    {:label 1,
     :text
     "the film provides some great insight into the neurotic mindset of all comics -- even those who have reached the absolute top of the game ."}}]
- :num_rows_total 6}
