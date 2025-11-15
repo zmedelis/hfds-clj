@@ -1,17 +1,17 @@
 (ns hfds-clj.models
   (:require
-   [clj-http.client :as http]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [jansi-clj.core]
    [progress.determinate]
    [progress.indeterminate]
-   )
+   [hato.client :as hc]
+   [hato.middleware :as hm]
+   [jsonista.core :as json])
   (:import
    (org.apache.commons.io.input CountingInputStream)))
 
 
-(def spinner-style
+(def ^:private spinner-style
   ;(:coloured-ascii-boxes progress.determinate/styles)
   (:ascii-basic progress.determinate/styles))
 
@@ -26,6 +26,9 @@
           counter (CountingInputStream. (:body resp))]
       (merge resp {:body                     counter
                    :downloaded-bytes-counter counter}))))
+
+(def ^:private my-middleware (concat [(first hm/default-middleware) wrap-downloaded-bytes-counter]
+                                     (drop 1 hm/default-middleware)))
 
 
 (defn- do-download [progress response target]
@@ -47,37 +50,33 @@
 (defn- download-with-progress [url target path authorization-token
                                progress-files
                                total-files]
-  (http/with-middleware
-    (-> http/default-middleware
-        ;(insert-after http/wrap-redirects wrap-downloaded-bytes-counter)
-        (conj wrap-downloaded-bytes-counter)
-        (conj http/wrap-lower-case-headers))
-    (let [response (http/get url
-                             {:as :stream
-                              :headers {"Authorization"
-                                        (format "Bearer %s" authorization-token)}})
+  (let [response (hc/get url
+                         {:as :stream
+                          :http-client {:redirect-policy :always}
+                          :middleware my-middleware
+                          :headers {"Authorization"
+                                    (format "Bearer %s" authorization-token)}})
 
-          length (Long. (get-in response [:headers "content-length"] 0))
-          total-mb (if (zero? length)
-                     Integer/MAX_VALUE
-                     (int (/ length 1024 1024)))
-          progress (atom 0)]
+        length (Long. (get-in response [:headers "content-length"] 0))
+        total-mb (if (zero? length)
+                   Integer/MAX_VALUE
+                   (int (/ length 1024 1024)))
+        progress (atom 0)]
 
-      (progress.determinate/animate!
-
-       progress
-       :opts {:total total-mb
-              :redraw-rate 60 ; Use 60 fps for the demo
-              :style spinner-style
-              :label (format "%s (%s/%s)"  path progress-files total-files)
-              :preserve true
-              :units "MB"}
-       (do-download progress response target)))))
+    (progress.determinate/animate!
+     progress
+     :opts {:total total-mb
+            :redraw-rate 60
+            :style spinner-style
+            :label (format "%s (%s/%s)"  path progress-files total-files)
+            :preserve true
+            :units "MB"}
+     (do-download progress response target))))
 
 
 
 (defn download-model!
-  "Download all files from a given 'model' from huggigface to a local dir"
+  "Download all files from a given 'model' from huggingface to a local dir"
 
   [models-base-dir model-name authorization-token]
   (let [split-by-slash (str/split model-name #"/")
@@ -87,10 +86,11 @@
 
         model-files
         (->
-         (http/get (format "https://huggingface.co/api/models/%s/%s/tree/main?recursive=true" model-namespace model-repo)
-                   {:headers {"Authorization" (format "Bearer %s" authorization-token)}
-                    :as :json})
-         :body)
+         (hc/get (format "https://huggingface.co/api/models/%s/%s/tree/main?recursive=true" model-namespace model-repo)
+                 {:headers {"Authorization" (format "Bearer %s" authorization-token)}})
+         :body
+         (json/read-value json/keyword-keys-object-mapper))
+
         file-progress (atom 0)]
     (run!
      (fn [{:keys [type path]}]
@@ -114,10 +114,8 @@
 
 
 (comment
-  
+
   (hfds-clj.models/download-model!  "/tmp/hf-models"
                                     "nvidia/Gemma-2b-it-ONNX-INT4"
-                                    (slurp "hf_token.txt"))
-  )
-  
-    
+                                    (slurp "hf_token.txt")))
+

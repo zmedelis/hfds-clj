@@ -7,9 +7,8 @@
          metosin/jsonista         {:mvn/version "0.3.8"}
          progrock/progrock        {:mvn/version "0.1.2"}
          
-         clj-http/clj-http {:mvn/version "3.13.1"}
          com.github.pmonks/spinner {:mvn/version "2.0.292"}
-         cheshire/cheshire {:mvn/version "6.1.0"}
+         commons-io/commons-io {:mvn/version "2.11.0"}
          }
  :aliases
  {:download-dataset
