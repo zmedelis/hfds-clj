@@ -1,0 +1,123 @@
+(ns hfds-clj.models
+  (:require
+   [clj-http.client :as http]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [jansi-clj.core]
+   [progress.determinate]
+   [progress.indeterminate]
+   )
+  (:import
+   (org.apache.commons.io.input CountingInputStream)))
+
+
+(def spinner-style
+  ;(:coloured-ascii-boxes progress.determinate/styles)
+  (:ascii-basic progress.determinate/styles))
+
+
+
+(defn- wrap-downloaded-bytes-counter
+  "Middleware that provides an CountingInputStream wrapping the stream output"
+  [client]
+  (fn [req]
+    (let [resp (client req)
+
+          counter (CountingInputStream. (:body resp))]
+      (merge resp {:body                     counter
+                   :downloaded-bytes-counter counter}))))
+
+
+(defn- do-download [progress response target]
+  (let [buffer-size (* 1024 1024)]
+    (with-open [input (:body response)
+                output (io/output-stream target)]
+      (let [buffer (make-array Byte/TYPE buffer-size)
+            counter (:downloaded-bytes-counter response)]
+        (loop []
+          (let [size (.read input buffer)
+                progress-mb (int (/ (.getByteCount counter) 1024 1024))]
+            (when (pos? size)
+              (.write output buffer 0 size)
+              (when (pos? progress-mb)
+                (reset! progress progress-mb))
+              (recur))))))))
+
+
+(defn- download-with-progress [url target path authorization-token
+                               progress-files
+                               total-files]
+  (http/with-middleware
+    (-> http/default-middleware
+        ;(insert-after http/wrap-redirects wrap-downloaded-bytes-counter)
+        (conj wrap-downloaded-bytes-counter)
+        (conj http/wrap-lower-case-headers))
+    (let [response (http/get url
+                             {:as :stream
+                              :headers {"Authorization"
+                                        (format "Bearer %s" authorization-token)}})
+
+          length (Long. (get-in response [:headers "content-length"] 0))
+          total-mb (if (zero? length)
+                     Integer/MAX_VALUE
+                     (int (/ length 1024 1024)))
+          progress (atom 0)]
+
+      (progress.determinate/animate!
+
+       progress
+       :opts {:total total-mb
+              :redraw-rate 60 ; Use 60 fps for the demo
+              :style spinner-style
+              :label (format "%s (%s/%s)"  path progress-files total-files)
+              :preserve true
+              :units "MB"}
+       (do-download progress response target)))))
+
+
+
+(defn download-model!
+  "Download all files from a given 'model' from huggigface to a local dir"
+
+  [models-base-dir model-name authorization-token]
+  (let [split-by-slash (str/split model-name #"/")
+        model-namespace (first split-by-slash)
+        model-repo (second split-by-slash)
+        model-base-dir (format "%s/%s/%s" models-base-dir model-namespace model-repo)
+
+        model-files
+        (->
+         (http/get (format "https://huggingface.co/api/models/%s/%s/tree/main?recursive=true" model-namespace model-repo)
+                   {:headers {"Authorization" (format "Bearer %s" authorization-token)}
+                    :as :json})
+         :body)
+        file-progress (atom 0)]
+    (run!
+     (fn [{:keys [type path]}]
+       (case type
+         "directory" (io/make-parents (format "%s/%s" model-base-dir path))
+         "file"
+         (do
+           (io/make-parents (format "%s/%s" model-base-dir path))
+           (download-with-progress (format "https://huggingface.co/%s/%s/resolve/main/%s" model-namespace model-repo path)
+                                   (format "%s/%s" model-base-dir path)
+                                   path
+                                   authorization-token
+                                   @file-progress
+                                   (count model-files))
+           (swap! file-progress inc))))
+     model-files)))
+
+(defn download-cli [{:keys [model hf-token models-base-dir]}]
+  (download-model! models-base-dir model hf-token))
+
+
+
+(comment
+  
+  (hfds-clj.models/download-model!  "/tmp/hf-models"
+                                    "nvidia/Gemma-2b-it-ONNX-INT4"
+                                    (slurp "hf_token.txt"))
+  )
+  
+    
