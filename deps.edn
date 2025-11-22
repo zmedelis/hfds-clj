@@ -12,7 +12,7 @@
          }
  :aliases
  {:download-dataset
-  {:ns-default hfds-clj.core
+  {:ns-default hfds-clj.datasets
    :exec-fn download-cli
    :exec-args {:split   "train"
                :config  "default"

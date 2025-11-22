@@ -78,7 +78,7 @@
 (defn download-model!
   "Download all files from a given 'model' from huggingface to a local dir"
 
-  [models-base-dir model-name authorization-token]
+  [models-base-dir model-name hf-authorization-token]
   (let [split-by-slash (str/split model-name #"/")
         model-namespace (first split-by-slash)
         model-repo (second split-by-slash)
@@ -87,7 +87,7 @@
         model-files
         (->
          (hc/get (format "https://huggingface.co/api/models/%s/%s/tree/main?recursive=true" model-namespace model-repo)
-                 {:headers {"Authorization" (format "Bearer %s" authorization-token)}})
+                 {:headers {"Authorization" (format "Bearer %s" hf-authorization-token)}})
          :body
          (json/read-value json/keyword-keys-object-mapper))
 
@@ -102,13 +102,16 @@
            (download-with-progress (format "https://huggingface.co/%s/%s/resolve/main/%s" model-namespace model-repo path)
                                    (format "%s/%s" model-base-dir path)
                                    path
-                                   authorization-token
+                                   hf-authorization-token
                                    @file-progress
                                    (count model-files))
            (swap! file-progress inc))))
      model-files)))
 
 (defn download-cli [{:keys [model hf-token models-base-dir]}]
+  (assert (some? model) "'model' is missing. Model name must be provided.")
+  (assert (some? hf-token) "'hf-token' is missing. Huggingface authorization token must be provided.")
+  (assert (some? models-base-dir) "'model-base-dir' is missing. Base dir to store models must be provided.")
   (download-model! models-base-dir model hf-token))
 
 
