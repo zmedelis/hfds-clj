@@ -1,4 +1,4 @@
-(ns hfds-clj.core
+(ns hfds-clj.datasets
   "Dataset fetching and storing from HuggingFace.
 
   HF Datasets provide rich functionality

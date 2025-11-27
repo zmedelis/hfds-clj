@@ -5,35 +5,44 @@
          hato/hato                {:mvn/version "0.9.0"}
          com.taoensso/timbre      {:mvn/version "6.3.1"}
          metosin/jsonista         {:mvn/version "0.3.8"}
-         progrock/progrock        {:mvn/version "0.1.2"}}
+         progrock/progrock        {:mvn/version "0.1.2"}
+         
+         com.github.pmonks/spinner {:mvn/version "2.0.292"}
+         commons-io/commons-io {:mvn/version "2.11.0"}
+         }
  :aliases
- {:download
-  {:ns-default hfds-clj.core
+ {:download-dataset
+  {:ns-default hfds-clj.datasets
    :exec-fn download-cli
    :exec-args {:split   "train"
                :config  "default"
                :offset  0
                :length  100}}
+  :download-model
+  {:ns-default hfds-clj.models
+   :exec-fn download-cli
+   :exec-args {}}
 
-  :outdated
-  {:deps      {com.github.liquidz/antq {:mvn/version "RELEASE"}}
-   :main-opts ["-m" "antq.core" "--upgrade"]}
 
-  :kaocha
-  {:main-opts   ["-m" "kaocha.runner"]
-   :extra-paths ["test"]
-   :extra-deps  {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
+   :outdated
+   {:deps      {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+    :main-opts ["-m" "antq.core" "--upgrade"]}
 
-  :build
-  {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
-                slipset/deps-deploy           {:mvn/version "0.2.2"}}
-   :ns-default build}
+   :kaocha
+   {:main-opts   ["-m" "kaocha.runner"]
+    :extra-paths ["test"]
+    :extra-deps  {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
 
-  :neil
-  {:project {:name    io.github.zmedelis/hfds-clj
-             :version "2023.12.11"}}
-  :test
-  {:extra-paths ["test"]
-   :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
-                 io.github.cognitect-labs/test-runner
-                 {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}}}
+   :build
+   {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
+                 slipset/deps-deploy           {:mvn/version "0.2.2"}}
+    :ns-default build}
+
+   :neil
+   {:project {:name    io.github.zmedelis/hfds-clj
+              :version "2023.12.11"}}
+   :test
+   {:extra-paths ["test"]
+    :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+                  io.github.cognitect-labs/test-runner
+                  {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}}}
