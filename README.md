@@ -57,6 +57,24 @@ clojure -X:download-model :model '"nvidia/Gemma-2b-it-ONNX-INT4"' :hf-token "<hu
 ```
 
 
+# Usage as Clojure tool
+'hfds-clj'  can be used as well as a Clojure tool.
+
+Installation as tool (latest GIT version)
+
+```bash
+clojure -Ttools install io.github.zmedelis/hfds-clj '{:git/url "https://github.com/zmedelis/hfds-clj" :git/sha "4a84254030fceca8bf3f5e8dce4226b4b8cdf48a"}' :as hfds-clj
+```
+Example to to call it as tool, to download data/model:
+
+```bash
+clojure -Thfds-clj hfds-clj.datasets/download-cli :dataset "allenai/prosocial-dialog"
+clojure -Thfds-clj hfds-clj.models/download-cli :model '"nvidia/Gemma-2b-it-ONNX-INT4"' :hf-token "<token>" :models-base-dir '"/tmp/models"'
+
+```
+
+
+
 ## Notes
 
 * This is extracted from [Bosquet](https://github.com/zmedelis/bosquet) where HuggingFace datasets are used for LLM related developments.
