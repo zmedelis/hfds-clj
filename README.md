@@ -65,17 +65,27 @@ Installation as tool (latest GIT version)
 ```bash
 clojure -Ttools install io.github.zmedelis/hfds-clj '{:git/url "https://github.com/zmedelis/hfds-clj" :git/sha "4a84254030fceca8bf3f5e8dce4226b4b8cdf48a"}' :as hfds-clj
 ```
-Example to to call it as tool, to download data/model:
-
+Example to to call it as tool, to download data 
 ```bash
 clojure -Thfds-clj hfds-clj.datasets/download-cli :dataset "allenai/prosocial-dialog"
-clojure -Thfds-clj hfds-clj.models/download-cli :model '"nvidia/Gemma-2b-it-ONNX-INT4"' :hf-token "<token>" :models-base-dir '"/tmp/models"'
+```
+
+and model:
+```bash
+clojure -Thfds-clj hfds-clj.models/download-cli 
+     :models-base-dir '"/tmp/models"' 
+     :model '"nvidia/Gemma-2b-it-ONNX-INT4"' 
+     :revision '"4fe167cca69847b5218e7cc37c7e1984056cf340"'
+     :hf-token "<huggingface API token>" 
 
 ```
+`:revision` is optional. If not specified, "main" (= latest)  is used
+
+`:hf-token`  is optional. Most models are public, so no huggingface token is needed
 
 
 
 ## Notes
 
 * This is extracted from [Bosquet](https://github.com/zmedelis/bosquet) where HuggingFace datasets are used for LLM related developments.
-* Thanks to [TrueGrit](https://github.com/KingMob/TrueGrit) helping to rebustly fetch data from HF API
+* Thanks to [TrueGrit](https://github.com/KingMob/TrueGrit) helping to robustly fetch data from HF API
