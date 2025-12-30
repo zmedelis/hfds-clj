@@ -40,7 +40,7 @@
 
    :neil
    {:project {:name    io.github.zmedelis/hfds-clj
-              :version "2023.12.11"}}
+              :version "2025.12.30"}}
    :test
    {:extra-paths ["test"]
     :extra-deps  {org.clojure/test.check {:mvn/version "1.1.2"}
