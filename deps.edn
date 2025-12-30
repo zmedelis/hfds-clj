@@ -1,14 +1,14 @@
 {:paths ["src" "resources"]
- :deps  {org.clojure/clojure      {:mvn/version "1.11.1"}
-         net.modulolotus/truegrit {:mvn/version "2.1.30"}
-         me.flowthing/pp          {:mvn/version "2023-11-25.47"}
-         hato/hato                {:mvn/version "0.9.0"}
-         com.taoensso/timbre      {:mvn/version "6.3.1"}
-         metosin/jsonista         {:mvn/version "0.3.8"}
-         progrock/progrock        {:mvn/version "0.1.2"}
+ :deps  {org.clojure/clojure      {:mvn/version "1.12.4"}
+         net.modulolotus/truegrit {:mvn/version "2.3.35"}
+         me.flowthing/pp          {:mvn/version "2024-11-13.77"}
+         hato/hato                {:mvn/version "1.0.0"}
+         com.taoensso/timbre      {:mvn/version "6.8.0"}
+         metosin/jsonista         {:mvn/version "0.3.13"}
+         progrock/progrock        {:mvn/version "1.0.0"}
          
-         com.github.pmonks/spinner {:mvn/version "2.0.292"}
-         commons-io/commons-io {:mvn/version "2.11.0"}
+         com.github.pmonks/spinner {:mvn/version "2.0.297"}
+         commons-io/commons-io {:mvn/version "2.21.0"}
          }
  :aliases
  {:download-dataset
@@ -31,10 +31,10 @@
    :kaocha
    {:main-opts   ["-m" "kaocha.runner"]
     :extra-paths ["test"]
-    :extra-deps  {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
+    :extra-deps  {lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
 
    :build
-   {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
+   {:deps       {io.github.clojure/tools.build {:git/tag "v0.10.11" :git/sha "c6c670a"}
                  slipset/deps-deploy           {:mvn/version "0.2.2"}}
     :ns-default build}
 
@@ -43,6 +43,6 @@
               :version "2023.12.11"}}
    :test
    {:extra-paths ["test"]
-    :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}
+    :extra-deps  {org.clojure/test.check {:mvn/version "1.1.2"}
                   io.github.cognitect-labs/test-runner
                   {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}}}
