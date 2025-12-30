@@ -78,15 +78,15 @@
 (defn download-model!
   "Download all files from a given 'model' from huggingface to a local dir"
 
-  [models-base-dir model-name hf-authorization-token]
+  [models-base-dir model-name revision hf-authorization-token]
   (let [split-by-slash (str/split model-name #"/")
         model-namespace (first split-by-slash)
         model-repo (second split-by-slash)
         model-base-dir (format "%s/%s/%s" models-base-dir model-namespace model-repo)
-
+        
         model-files
         (->
-         (hc/get (format "https://huggingface.co/api/models/%s/%s/tree/main?recursive=true" model-namespace model-repo)
+         (hc/get (format "https://huggingface.co/api/models/%s/%s/tree/%s?recursive=true" model-namespace model-repo revision)
                  {:headers {"Authorization" (format "Bearer %s" hf-authorization-token)}})
          :body
          (json/read-value json/keyword-keys-object-mapper))
@@ -108,11 +108,14 @@
            (swap! file-progress inc))))
      model-files)))
 
-(defn download-cli [{:keys [model hf-token models-base-dir]}]
+(defn download-cli [{:keys [model revision hf-token models-base-dir]
+                     :or {revision "main"}
+                     }
+                    ]
   (assert (some? model) "'model' is missing. Model name must be provided.")
-  (assert (some? hf-token) "'hf-token' is missing. Huggingface authorization token must be provided.")
+  ;(assert (some? hf-token) "'hf-token' is missing. Huggingface authorization token must be provided.")
   (assert (some? models-base-dir) "'model-base-dir' is missing. Base dir to store models must be provided.")
-  (download-model! models-base-dir model hf-token))
+  (download-model! models-base-dir model revision hf-token))
 
 
 
@@ -120,5 +123,7 @@
 
   (hfds-clj.models/download-model!  "/tmp/hf-models"
                                     "nvidia/Gemma-2b-it-ONNX-INT4"
-                                    (slurp "hf_token.txt")))
+                                    "revision"
+                                    (slurp "hf_token.txt"))
+  )
 
